@@ -23,6 +23,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.theme.colorScheme.background,
       appBar: AppBar(
         title: Text(
           _payload.toString().split('|')[0],
@@ -67,7 +68,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           Expanded(
               child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             margin: const EdgeInsets.symmetric(horizontal: 30),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30), color: primaryClr),
@@ -91,7 +92,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20,),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   Text(
                     _payload.toString().split('|')[0],
                     style: TextStyle(color: Colors.white, fontSize: 20),
@@ -115,7 +118,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20,),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   Text(
                     _payload.toString().split('|')[1],
                     style: TextStyle(fontSize: 20, color: Colors.white),
@@ -139,8 +144,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20,),
-                  Text(_payload.toString().split('|')[2],style: TextStyle(color: Colors.white,fontSize: 20),),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    _payload.toString().split('|')[2],
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
                   const SizedBox(
                     height: 20,
                   ),
