@@ -13,9 +13,11 @@ class SizeConfig{
     screenHeight=_mediaQueryData.size.height;
     orientation=_mediaQueryData.orientation;
   }
-}
+  
 
-    double getProportionateScreenHeight(double inputHeight){
+
+}
+double getProportionateScreenHeight(double inputHeight){
       double screenHeight=SizeConfig.screenHeight;
       return (inputHeight/812)*screenHeight;
       //standarad layout height=812
@@ -27,4 +29,6 @@ class SizeConfig{
       return (inputWidth/375)*screenWidth;
       //standarad layout width =375
     }
+
+    
   

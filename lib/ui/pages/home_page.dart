@@ -1,11 +1,14 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_todo_app/controller/task_controller.dart';
+import 'package:flutter_todo_app/models/task.dart';
 import 'package:flutter_todo_app/services/notification_services.dart';
 import 'package:flutter_todo_app/services/theme_services.dart';
 import 'package:flutter_todo_app/ui/pages/add_task_page.dart';
 import 'package:flutter_todo_app/ui/widgets/button.dart';
+import 'package:flutter_todo_app/ui/widgets/task_tile.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -21,13 +24,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-late NotificationHelper notificationHelper;
-@override
+  late NotificationHelper notificationHelper;
+  @override
   void initState() {
     super.initState();
-    notificationHelper=NotificationHelper();
+    notificationHelper = NotificationHelper();
     notificationHelper.initializeNotification();
-    notificationHelper.requestIosPermission();
+    //notificationHelper.requestIosPermission();
     //notificationHelper.requestAndroidPermission();
   }
 
@@ -57,9 +60,8 @@ late NotificationHelper notificationHelper;
       leading: IconButton(
         onPressed: () {
           ThemeServices().switchTheme();
-          notificationHelper.displayNotification(
-              title: 'Theme Changed', body: "Test Notification");
-          NotificationHelper().scheduledNotification();
+          // notificationHelper.displayNotification(
+          //     title: 'Theme Changed', body: "Test Notification");
         },
         icon: Icon(
           Get.isDarkMode
@@ -152,7 +154,32 @@ late NotificationHelper notificationHelper;
   }
 
   _showTasks() {
-    return Expanded(child: _noTaskMsg());
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _taskController.taskList.length,
+        scrollDirection :(SizeConfig.orientation==Orientation.landscape)?Axis.horizontal: Axis.vertical,
+        itemBuilder: (context,index){
+        var task= _taskController.taskList[index];
+        NotificationHelper().scheduledNotification();
+       return  AnimationConfiguration.staggeredList(
+        position: index,//elment place in the list
+        duration: const Duration(milliseconds: 1375),
+         child: SlideAnimation(
+          horizontalOffset: 300,
+           child: FadeInAnimation(
+            
+             child: GestureDetector(
+              onTap: () => showBottomSheet(context,task),
+              child: TaskTile(
+                task
+             )),
+           ),
+         ),
+       );
+     
+      }),
+    );
+    
     // return Expanded(
     //   child: Obx(() {
     //     if (_taskController.taskList.isEmpty) {
@@ -212,5 +239,94 @@ late NotificationHelper notificationHelper;
         )
       ],
     );
+  }
+
+  _buildBottomSheet(
+      {required String label,
+      required Function() onTap,
+      required Color clr,
+      bool isClose = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        height: 55,
+        width: SizeConfig.screenWidth * 0.9,
+        decoration: BoxDecoration(
+            border: Border.all(
+              width: 2,
+              color: isClose
+                  ? Get.isDarkMode
+                      ? Colors.grey[600]!
+                      : Colors.grey[300]!
+                  : clr,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            color: isClose ? Colors.transparent : clr),
+        child: Center(
+          child: Text(
+            label,
+            style:
+                isClose ? titleStyle : titleStyle.copyWith(color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+
+  showBottomSheet(BuildContext context, Task task) {
+    Get.bottomSheet(SingleChildScrollView(
+      child: Container(
+        padding: const EdgeInsets.only(left: 20,right: 20),
+        width: SizeConfig.screenWidth,
+        height: (SizeConfig.orientation == Orientation.landscape)
+            ? (task.isCompleted == 1)
+                ? SizeConfig.screenHeight * 0.6
+                : SizeConfig.screenHeight * 0.8
+            : (task.isCompleted == 1)
+                ? SizeConfig.screenHeight * 0.30
+                : SizeConfig.screenHeight * 0.39,
+        color: Get.isDarkMode ? darkHeaderClr : Colors.white,
+        child: Column(
+          children: [
+            Flexible(
+              child: Container(
+                height: 6,
+                width: 120,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color:
+                        Get.isDarkMode ? Colors.grey[600] : Colors.grey[300]),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            task.isCompleted == 1
+                ? Container()
+                : _buildBottomSheet(
+                    label: 'Task Completed',
+                    onTap: () {
+                      Get.back();
+                    },
+                    clr: primaryClr),
+            
+            _buildBottomSheet(
+                label: 'Delete Task',
+                onTap: () {
+                  Get.back();
+                },
+                clr: primaryClr),
+                Divider(
+              color: Get.isDarkMode ? Colors.grey : darkGreyClr,
+            ),
+            _buildBottomSheet(label: 'Cancel', onTap: () {}, clr: primaryClr),
+            const SizedBox(
+              height: 10,
+            )
+          ],
+        ),
+      ),
+    ));
   }
 }
