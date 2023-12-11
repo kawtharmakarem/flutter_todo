@@ -36,7 +36,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             onPressed: () {
               Get.back();
             },
-            icon: const Icon(Icons.arrow_back_ios)),
+            icon:  Icon(Icons.arrow_back_ios,color: Get.isDarkMode ? Colors.white : darkGreyClr)),
       ),
       body: SafeArea(
           child: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_app/models/task.dart';
 import 'package:flutter_todo_app/ui/theme.dart';
 import 'package:flutter_todo_app/ui/widgets/input_field.dart';
 import 'package:get/get.dart';
@@ -58,7 +59,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   title: 'Date',
                   hint: DateFormat.yMd().format(_selectedDate),
                   widget: IconButton(
-                      onPressed: () {},
+                      onPressed: () => _getDateFromUser(),
                       icon: Icon(
                         Icons.calendar_today_outlined,
                         color: Colors.grey,
@@ -71,7 +72,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     title: 'StartTime',
                     hint: _startTime,
                     widget: IconButton(
-                        onPressed: () {},
+                        onPressed: () => _getTimeFromUser(isStartTime: true),
                         icon: Icon(
                           Icons.access_time_rounded,
                           color: Colors.grey,
@@ -85,7 +86,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     title: 'EndDate',
                     hint: _endTime,
                     widget: IconButton(
-                        onPressed: () {},
+                        onPressed: () => _getTimeFromUser(isStartTime: true),
                         icon: Icon(
                           Icons.access_time_rounded,
                           color: Colors.grey,
@@ -172,9 +173,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 children: [
                   _colorPallete(),
                   MyButton(
-                      label: "Create Task",
+                      label: 'Create Task',
                       onTap: () {
-                        Get.back();
+                        _validateDate();
                       })
                 ],
               )
@@ -183,6 +184,39 @@ class _AddTaskPageState extends State<AddTaskPage> {
         ),
       ),
     );
+  }
+
+  _validateDate() {
+    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+      _addTasksToDb();
+      Get.back();
+    } else if (_titleController.text.isEmpty || _noteController.text.isEmpty) {
+      Get.snackbar('required', 'All fields are required',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: pinkClr,
+          icon: const Icon(
+            Icons.warning_amber_outlined,
+            color: Colors.red,
+          ));
+    } else {
+      print('something went wriong');
+    }
+  }
+
+  _addTasksToDb() async {
+    int value = await _taskController.addTask(
+        task: Task(
+            title: _titleController.text,
+            note: _noteController.text,
+            isCompleted: 0,
+            date: DateFormat.yMd().format(_selectedDate),
+            startTime: _startTime,
+            endTime: _endTime,
+            color: _selectedColor,
+            remind: _selectedRemind,
+            repeat: _selectedRepeat));
+    print('$value');
   }
 
   AppBar _appBar() => AppBar(
@@ -209,6 +243,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   Column _colorPallete() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Color',
@@ -249,5 +284,41 @@ class _AddTaskPageState extends State<AddTaskPage> {
         )
       ],
     );
+  }
+
+  _getTimeFromUser({required bool isStartTime}) async {
+    TimeOfDay? _pickedTime = await showTimePicker(
+      initialEntryMode: TimePickerEntryMode.input,
+      context: context,
+      initialTime: isStartTime
+          ? TimeOfDay.fromDateTime(DateTime.now())
+          : TimeOfDay.fromDateTime(
+              DateTime.now().add(
+                Duration(minutes: 5),
+              ),
+            ),
+    );
+    String formattedTime=_pickedTime!.format(context);
+    if(isStartTime)
+     setState(()=> _startTime=formattedTime);
+    else if(!isStartTime) 
+    setState(()=> _startTime=formattedTime);
+    else
+     print('Something went wrong');
+  }
+
+  _getDateFromUser() async {
+    DateTime? _pickedDate = await showDatePicker(
+        context: context,
+        initialDate: _selectedDate,
+        firstDate: DateTime(2017, 9, 7, 17, 30),
+        lastDate: DateTime(2030, 9, 7, 17, 30));
+    if (_pickedDate != null) {
+      setState(() {
+        _selectedDate = _pickedDate;
+      });
+    } else {
+      print('no selected date');
+    }
   }
 }
